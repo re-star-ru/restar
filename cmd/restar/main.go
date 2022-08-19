@@ -66,7 +66,7 @@ func listenForNewPeers(self string) {
 				continue
 			}
 
-			log.Printf("Found entry: id: %v, port: %v, ips: %v", entry.Instance, entry.Port, entry.AddrIPv4)
+			log.Printf("Found peer: id: %v, port: %v, ips: %v", entry.Instance, entry.Port, entry.AddrIPv4)
 		}
 	}(entries)
 
