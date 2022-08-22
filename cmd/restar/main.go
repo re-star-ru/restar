@@ -2,37 +2,43 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"github.com/google/uuid"
-	"github.com/grandcat/zeroconf"
-	"log"
 	"math/rand"
 	"net/http"
+	"os"
+	"restar/configs"
 	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-pkgz/rest"
+	"github.com/go-pkgz/rest/logger"
+	"github.com/google/uuid"
+	"github.com/grandcat/zeroconf"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
-	log.Println("Hello Restar")
+	config := configs.NewConfig()
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnixMs
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.StampMilli})
 
-	id := uuid.NewString()
+	instanceID := uuid.NewString()
+	setupPeers(instanceID)
 
-	m := http.NewServeMux()
-	m.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello World, id: " + id))
-	})
+	r := chi.NewRouter()
+	r.Use(rest.Ping, logger.Logger)
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) { rest.RenderJSON(w, "Instance id: "+instanceID) })
 
-	log.Println("id:", id)
+	log.Print("listen at:", config.Host)
+	log.Fatal().Err(http.ListenAndServe(config.Host, r)).Send()
+}
+
+func setupPeers(id string) {
+	log.Print("id:", id)
 
 	port := openRandomPort()
-	host := fmt.Sprintf(":%d", port)
-
 	go registerPeer(id, port)
 	go listenForNewPeers(id)
-
-	log.Println("listen at:", host)
-	log.Println(http.ListenAndServe(host, m))
-
-	select {}
 }
 
 func registerPeer(id string, port int) {
@@ -56,7 +62,7 @@ func registerPeer(id string, port int) {
 func listenForNewPeers(self string) {
 	resolver, err := zeroconf.NewResolver()
 	if err != nil {
-		log.Fatalf("Failed to initialize resolver: %s", err)
+		log.Fatal().Err(err).Msg("Failed to initialize resolver")
 	}
 
 	entries := make(chan *zeroconf.ServiceEntry)
@@ -72,7 +78,7 @@ func listenForNewPeers(self string) {
 
 	err = resolver.Browse(context.Background(), "_workstation._tcp", "local.", entries)
 	if err != nil {
-		log.Fatalln("Failed to browse:", err.Error())
+		log.Fatal().Err(err).Msg("Failed to browse")
 	}
 
 	select {}
