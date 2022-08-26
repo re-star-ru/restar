@@ -1,26 +1,30 @@
 package user
 
 import (
-	"net/http"
+	"context"
+	"google.golang.org/grpc"
 	"restar/pkg/domain"
+	"restar/pkg/user/pb"
 )
 
 type IUser interface {
 	Create(user *domain.User) error
 }
 
-type HttpHandler struct {
+type GRPCHandler struct {
+	pb.UnimplementedUserServiceServer
 	userUsecase IUser
 }
 
-func NewHttpHandler(userUsecase IUser) *HttpHandler {
-	return &HttpHandler{
-		userUsecase: userUsecase,
-	}
+func RegisterService(srv grpc.ServiceRegistrar, userUsecase IUser) {
+	srv.RegisterService(
+		&pb.UserService_ServiceDesc,
+		&GRPCHandler{
+			userUsecase: userUsecase,
+		},
+	)
 }
 
-func (u *HttpHandler) Create(w http.ResponseWriter, r *http.Request) {
-	u.userUsecase.Create(&domain.User{
-		Name: "1",
-	})
+func (g *GRPCHandler) UserInfo(ctx context.Context, req *pb.UserRequest) (*pb.UserResponse, error) {
+	return &pb.UserResponse{Name: "name is :" + req.Id}, nil
 }

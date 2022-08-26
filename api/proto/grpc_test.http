@@ -1,0 +1,5 @@
+GRPC {{host}}/UserService/UserInfo
+
+{
+  "id": "user"
+}
