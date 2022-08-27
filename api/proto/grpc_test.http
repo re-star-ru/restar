@@ -1,0 +1,6 @@
+### test user request
+GRPC {{host}}/UserService/UserInfo
+
+{
+  "id": "фывфыв23"
+}

@@ -2,10 +2,18 @@ package main
 
 import (
 	"context"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"math/rand"
+	"net"
 	"net/http"
 	"os"
 	"restar/configs"
+	"restar/pkg/user"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -22,6 +30,33 @@ func main() {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnixMs
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.StampMilli})
 
+	go runHealth(config)
+	run(config)
+}
+
+func run(c configs.Config) {
+	// setup logging and recovery
+	zl, _ := zap.NewDevelopment()
+	srv := grpc.NewServer(grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+		grpc_zap.UnaryServerInterceptor(zl.WithOptions(zap.AddCallerSkip(4))),
+		grpc_recovery.UnaryServerInterceptor(),
+	)))
+	reflection.Register(srv)
+
+	listen, err := net.Listen("tcp", c.Host)
+	if err != nil {
+		log.Fatal().Err(err).Msg("cant listen grpc service")
+	}
+
+	user.RegisterService(srv, user.NewUserUsecase())
+
+	log.Info().Msgf("restar service listen at %s", c.Host)
+	log.Fatal().Err(srv.Serve(listen)).Msg("cant serve grpc service")
+}
+
+/////////////////////////// service discovery and else
+
+func runHealth(c configs.Config) {
 	instanceID := uuid.NewString()
 	setupPeers(instanceID)
 
@@ -29,8 +64,8 @@ func main() {
 	r.Use(rest.Ping, logger.Logger)
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) { rest.RenderJSON(w, "Instance id: "+instanceID) })
 
-	log.Print("listen at:", config.Host)
-	log.Fatal().Err(http.ListenAndServe(config.Host, r)).Send()
+	log.Print("health listen at:", c.DiscoveryHost)
+	log.Fatal().Err(http.ListenAndServe(c.DiscoveryHost, r)).Send()
 }
 
 func setupPeers(id string) {

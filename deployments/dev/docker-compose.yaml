@@ -1,0 +1,30 @@
+services:
+
+  db:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: restar
+      POSTGRES_PASSWORD: restar
+      POSTGRES_DB: restar
+      PG_DATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - 5432:5432
+    volumes:
+      - ../../bin/db:/var/lib/postgresql/data
+
+  storage:
+    image: chrislusf/seaweedfs:3.23
+    command: 'server -s3 -dir /data'
+    ports:
+      - 8333:8333
+    volumes:
+      - ../../bin/storage:/data
+
+  fulltext:
+    image: getmeili/meilisearch:v0.28.1
+    environment:
+      - MEILI_DB_PATH=/data.ms
+    ports:
+      - 7700:7700
+    volumes:
+      - ../../bin/fulltext:/data.ms

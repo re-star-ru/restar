@@ -1,11 +1,13 @@
 package configs
 
 type Config struct {
-	Host string
+	Host          string
+	DiscoveryHost string
 }
 
 func NewConfig() Config {
 	return Config{
-		Host: "0.0.0.0:9999",
+		Host:          "0.0.0.0:8080",
+		DiscoveryHost: "0.0.0.0:9999",
 	}
 }
