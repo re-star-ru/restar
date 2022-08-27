@@ -50,7 +50,7 @@ func run(c configs.Config) {
 
 	user.RegisterService(srv, user.NewUserUsecase())
 
-	log.Info().Msgf("listen service at %s", c.Host)
+	log.Info().Msgf("restar service listen at %s", c.Host)
 	log.Fatal().Err(srv.Serve(listen)).Msg("cant serve grpc service")
 }
 
