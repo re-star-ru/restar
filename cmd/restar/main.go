@@ -57,14 +57,15 @@ func run(c configs.Config) {
 
 	conn, err := pgx.Connect(ctx, c.Postgres)
 	if err != nil {
-		log.Fatal().Err(err).Msg("cant connect to postgres")
+		log.Error().Err(err).Msg("cant connect to postgres")
+		return
 	}
 
 	drepo := diagnostic.NewPostgresRepo(conn)
-	diagnostic.NewUsecase(drepo) // todo: register service
+	diagnostic.RegisterService(srv, diagnostic.NewUsecase(drepo))
 
 	log.Info().Msgf("restar service listen at %s", c.Host)
-	log.Fatal().Err(srv.Serve(listen)).Msg("cant serve grpc service")
+	log.Error().Err(srv.Serve(listen)).Msg("cant serve grpc service")
 }
 
 /////////////////////////// service discovery and else

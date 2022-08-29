@@ -2,7 +2,7 @@ syntax = "proto3";
 option go_package = "pkg/user/pb;pb";
 
 message UserRequest {
-  string id = 1;
+  int64 id = 1;
 }
 
 message UserResponse {

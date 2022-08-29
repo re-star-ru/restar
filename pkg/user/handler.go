@@ -5,6 +5,7 @@ import (
 	"google.golang.org/grpc"
 	"restar/pkg/domain"
 	"restar/pkg/user/pb"
+	"strconv"
 )
 
 type IUser interface {
@@ -26,5 +27,5 @@ func RegisterService(srv grpc.ServiceRegistrar, userUsecase IUser) {
 }
 
 func (g *GRPCHandler) UserInfo(ctx context.Context, req *pb.UserRequest) (*pb.UserResponse, error) {
-	return &pb.UserResponse{Name: "name is :" + req.Id}, nil
+	return &pb.UserResponse{Name: "name is :" + strconv.Itoa(int(req.Id))}, nil
 }
