@@ -10,7 +10,8 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - ../../bin/db:/var/lib/postgresql/data
+      - ../../.bin/db:/var/lib/postgresql/data
+      - ../../configs/sql:/docker-entrypoint-initdb.d
 
   storage:
     image: chrislusf/seaweedfs:3.23
@@ -18,7 +19,7 @@ services:
     ports:
       - 8333:8333
     volumes:
-      - ../../bin/storage:/data
+      - ../../.bin/storage:/data
 
   fulltext:
     image: getmeili/meilisearch:v0.28.1
@@ -27,4 +28,4 @@ services:
     ports:
       - 7700:7700
     volumes:
-      - ../../bin/fulltext:/data.ms
+      - ../../.bin/fulltext:/data.ms

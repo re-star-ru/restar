@@ -5,11 +5,15 @@ import (
 	"restar/pkg/domain"
 )
 
-type Usecase struct {
+type Repo interface {
 }
 
-func NewUsecase() *Usecase {
-	return &Usecase{}
+type Usecase struct {
+	repo Repo
+}
+
+func NewUsecase(repo Repo) *Usecase {
+	return &Usecase{repo}
 }
 
 func (uc *Usecase) Create(ctx context.Context) (domain.Diagnostic, error) {
@@ -17,6 +21,10 @@ func (uc *Usecase) Create(ctx context.Context) (domain.Diagnostic, error) {
 }
 
 func (uc *Usecase) Update(ctx context.Context, diag *domain.Diagnostic) error {
+	return nil
+}
+
+func (uc *Usecase) Delete(ctx context.Context, id int64) error {
 	return nil
 }
 

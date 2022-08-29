@@ -5,6 +5,7 @@ import (
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	"github.com/jackc/pgx/v4"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -13,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"restar/configs"
+	"restar/pkg/diagnostic"
 	"restar/pkg/user"
 	"time"
 
@@ -49,6 +51,17 @@ func run(c configs.Config) {
 	}
 
 	user.RegisterService(srv, user.NewUserUsecase())
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	conn, err := pgx.Connect(ctx, c.Postgres)
+	if err != nil {
+		log.Fatal().Err(err).Msg("cant connect to postgres")
+	}
+
+	drepo := diagnostic.NewPostgresRepo(conn)
+	diagnostic.NewUsecase(drepo) // todo: register service
 
 	log.Info().Msgf("restar service listen at %s", c.Host)
 	log.Fatal().Err(srv.Serve(listen)).Msg("cant serve grpc service")
