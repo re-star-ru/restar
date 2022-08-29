@@ -5,6 +5,7 @@ create table "user" (
 
 create table image (
   id serial,
+  parent_id integer not null,
   "name" text,
   path text
 );
@@ -12,7 +13,6 @@ create table image (
 create table diagnostic (
   id serial,
   definedNumber text,
-  SKU text,
-  images image[] -- hmm, wtf
+  SKU text
 )
 

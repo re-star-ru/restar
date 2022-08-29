@@ -8,3 +8,8 @@ GRPC {{host}}/UserService/UserInfo
 ### create diagnostic request
 GRPC {{host}}/DiagnosticService/Create
 
+{
+  "definedNumber" : "cs125",
+  "sku": "123123",
+  "images": []
+}

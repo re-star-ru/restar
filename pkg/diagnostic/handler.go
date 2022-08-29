@@ -37,6 +37,7 @@ func (ds GRPCHandler) Create(ctx context.Context, diagnostic *pb.Diagnostic) (*p
 		Id:            diag.ID,
 		DefinedNumber: diag.DefinedNumber,
 		Sku:           diag.SKU,
+		Images:        []*pb.Image{},
 	}, nil
 }
 
