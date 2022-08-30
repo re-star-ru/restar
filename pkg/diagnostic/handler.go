@@ -27,6 +27,11 @@ func (ds GRPCHandler) Create(ctx context.Context, diagnostic *pb.Diagnostic) (*p
 		ID:            diagnostic.Id,
 		DefinedNumber: diagnostic.DefinedNumber,
 		SKU:           diagnostic.Sku,
+		Images: []domain.Image{
+			{Name: "test image", Path: "test path"},
+			{Name: "test image2", Path: "test path2"},
+			{Name: "test image3", Path: "test path3"},
+		},
 	})
 	if err != nil {
 		log.Err(err).Msg("cant create diagnostic")
