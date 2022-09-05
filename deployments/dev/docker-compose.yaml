@@ -17,7 +17,11 @@ services:
     image: chrislusf/seaweedfs:3.23
     command: 'server -s3 -dir /data'
     ports:
-      - 8333:8333
+      - 8333:8333 # s3 api
+      - 9333:9333 # cluster ui
+      - 8080:8080 # node ui
+      - 8888:8888 # filer ui
+
     volumes:
       - ../../.bin/storage:/data
 

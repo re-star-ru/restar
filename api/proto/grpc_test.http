@@ -2,14 +2,14 @@
 GRPC {{host}}/UserService/UserInfo
 
 {
-  "id": "фывфыв23"
+  "id": "фыв"
 }
 
 ### create diagnostic request
 GRPC {{host}}/DiagnosticService/Create
 
-{
-  "definedNumber" : "cs125",
-  "sku": "123123",
-  "images": []
-}
+### update
+GRPC {{host}}/DiagnosticService/Update
+
+### list
+GRPC {{host}}/DiagnosticService/List

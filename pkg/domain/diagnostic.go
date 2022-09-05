@@ -1,8 +1,16 @@
 package domain
 
+import "time"
+
 type Diagnostic struct {
-	ID            int64
+	ID        int64
+	CreatedAt time.Time
+	UpdatedAt time.Time
+
 	DefinedNumber string
 	SKU           string
-	Images        []Image
+
+	Items []Item
+
+	Images []Image
 }

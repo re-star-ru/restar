@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -22,9 +23,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DiagnosticServiceClient interface {
-	Create(ctx context.Context, in *Diagnostic, opts ...grpc.CallOption) (*Diagnostic, error)
+	Create(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Diagnostic, error)
 	Update(ctx context.Context, in *Diagnostic, opts ...grpc.CallOption) (*Diagnostic, error)
-	List(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*DiagnosticList, error)
+	List(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*DiagnosticList, error)
 }
 
 type diagnosticServiceClient struct {
@@ -35,7 +36,7 @@ func NewDiagnosticServiceClient(cc grpc.ClientConnInterface) DiagnosticServiceCl
 	return &diagnosticServiceClient{cc}
 }
 
-func (c *diagnosticServiceClient) Create(ctx context.Context, in *Diagnostic, opts ...grpc.CallOption) (*Diagnostic, error) {
+func (c *diagnosticServiceClient) Create(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Diagnostic, error) {
 	out := new(Diagnostic)
 	err := c.cc.Invoke(ctx, "/DiagnosticService/Create", in, out, opts...)
 	if err != nil {
@@ -53,7 +54,7 @@ func (c *diagnosticServiceClient) Update(ctx context.Context, in *Diagnostic, op
 	return out, nil
 }
 
-func (c *diagnosticServiceClient) List(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*DiagnosticList, error) {
+func (c *diagnosticServiceClient) List(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*DiagnosticList, error) {
 	out := new(DiagnosticList)
 	err := c.cc.Invoke(ctx, "/DiagnosticService/List", in, out, opts...)
 	if err != nil {
@@ -66,9 +67,9 @@ func (c *diagnosticServiceClient) List(ctx context.Context, in *Empty, opts ...g
 // All implementations must embed UnimplementedDiagnosticServiceServer
 // for forward compatibility
 type DiagnosticServiceServer interface {
-	Create(context.Context, *Diagnostic) (*Diagnostic, error)
+	Create(context.Context, *emptypb.Empty) (*Diagnostic, error)
 	Update(context.Context, *Diagnostic) (*Diagnostic, error)
-	List(context.Context, *Empty) (*DiagnosticList, error)
+	List(context.Context, *emptypb.Empty) (*DiagnosticList, error)
 	mustEmbedUnimplementedDiagnosticServiceServer()
 }
 
@@ -76,13 +77,13 @@ type DiagnosticServiceServer interface {
 type UnimplementedDiagnosticServiceServer struct {
 }
 
-func (UnimplementedDiagnosticServiceServer) Create(context.Context, *Diagnostic) (*Diagnostic, error) {
+func (UnimplementedDiagnosticServiceServer) Create(context.Context, *emptypb.Empty) (*Diagnostic, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
 func (UnimplementedDiagnosticServiceServer) Update(context.Context, *Diagnostic) (*Diagnostic, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
-func (UnimplementedDiagnosticServiceServer) List(context.Context, *Empty) (*DiagnosticList, error) {
+func (UnimplementedDiagnosticServiceServer) List(context.Context, *emptypb.Empty) (*DiagnosticList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
 func (UnimplementedDiagnosticServiceServer) mustEmbedUnimplementedDiagnosticServiceServer() {}
@@ -99,7 +100,7 @@ func RegisterDiagnosticServiceServer(s grpc.ServiceRegistrar, srv DiagnosticServ
 }
 
 func _DiagnosticService_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Diagnostic)
+	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -111,7 +112,7 @@ func _DiagnosticService_Create_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: "/DiagnosticService/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DiagnosticServiceServer).Create(ctx, req.(*Diagnostic))
+		return srv.(DiagnosticServiceServer).Create(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -135,7 +136,7 @@ func _DiagnosticService_Update_Handler(srv interface{}, ctx context.Context, dec
 }
 
 func _DiagnosticService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
+	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -147,7 +148,7 @@ func _DiagnosticService_List_Handler(srv interface{}, ctx context.Context, dec f
 		FullMethod: "/DiagnosticService/List",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DiagnosticServiceServer).List(ctx, req.(*Empty))
+		return srv.(DiagnosticServiceServer).List(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }

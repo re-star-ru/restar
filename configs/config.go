@@ -8,7 +8,7 @@ type Config struct {
 
 func NewConfig() Config {
 	return Config{
-		Host:          "0.0.0.0:8080",
+		Host:          "0.0.0.0:8090",
 		DiscoveryHost: "0.0.0.0:9999",
 		Postgres:      "postgresql://restar:restar@localhost:5432/restar",
 	}

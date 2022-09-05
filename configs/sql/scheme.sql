@@ -16,8 +16,11 @@ create table product (
 
 create table diagnostic (
   id bigserial primary key,
-  definedNumber text,
-  SKU text
+  createdAt timestamptz not null,
+  updatedAt timestamptz not null ,
+
+  definedNumber text not null,
+  SKU text not null
 );
 
 create table diagnostic_product (

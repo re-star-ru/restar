@@ -1,27 +1,44 @@
 syntax = "proto3";
 option go_package = "pkg/diagnostic/pb;pb";
 
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
 message Image {
   int64 id = 1;
   string name = 2;
   string path = 3;
 }
 
-message Diagnostic {
-  int64 id = 1;
-  string definedNumber = 2;
-  string sku = 3;
-  repeated Image images = 4;
+enum ItemType {
+  ITEM_TYPE_UNKNOWN = 0;
+  ITEM_TYPE_PRODUCT = 1;
+  ITEM_TYPE_SERVICE = 2;
 }
 
-message Empty {}
+message Item {
+  int64 id = 1;
+  ItemType itemType = 2;
+  string name = 3;
+}
+
+message Diagnostic {
+  int64 id = 1;
+  google.protobuf.Timestamp createdAt = 2;
+  google.protobuf.Timestamp updatedAt = 3;
+  string definedNumber = 4;
+  string sku = 5;
+
+  repeated Item items = 6;
+  repeated Image images = 7;
+}
 
 message DiagnosticList {
   repeated Diagnostic list = 1;
 }
 
 service DiagnosticService {
-  rpc Create(Diagnostic) returns (Diagnostic) {}
+  rpc Create(google.protobuf.Empty) returns (Diagnostic) {}
   rpc Update(Diagnostic) returns (Diagnostic) {}
-  rpc List(Empty) returns (DiagnosticList) {}
+  rpc List(google.protobuf.Empty) returns (DiagnosticList) {}
 }
