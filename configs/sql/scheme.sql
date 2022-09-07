@@ -32,7 +32,7 @@ drop view if exists diagnostic_view;
 create view diagnostic_view as
 	select distinct on (id) *
 	from diagnostic
-	order by id, version desc;
+	order by id desc, version desc;
 
 -- explain select * from diagnostic_view limit 500;
 

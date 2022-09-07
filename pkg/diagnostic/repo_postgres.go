@@ -32,10 +32,15 @@ func (p PostgresRepo) Create(ctx context.Context, diag domain.Diagnostic) (domai
 		return domain.Diagnostic{}, fmt.Errorf("cant scan id %w", err)
 	}
 
+	if err = tx.Commit(ctx); err != nil {
+		return domain.Diagnostic{}, fmt.Errorf("cant commit new dignostic %w", err)
+	}
+
 	return resp, nil
 }
 
 func (p PostgresRepo) Update(ctx context.Context, diag *domain.Diagnostic) error {
+
 	return nil
 }
 
@@ -43,7 +48,8 @@ func (p PostgresRepo) List(ctx context.Context) ([]domain.Diagnostic, error) {
 	rows, err := p.db.Query(ctx, `
 		select id, "version", created_at, updated_at, sku, defined_number
 		from diagnostic_view 
-		limit 50`)
+		limit 50
+		offset 0`)
 	if err != nil {
 		return nil, fmt.Errorf("cant query list diagnostic %w", err)
 	}
