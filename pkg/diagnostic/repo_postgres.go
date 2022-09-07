@@ -23,9 +23,11 @@ func (p PostgresRepo) Create(ctx context.Context, diag domain.Diagnostic) (domai
 	}
 	defer tx.Rollback(ctx)
 
-	id := 0
-	if err := tx.QueryRow(ctx,
-		`insert into diagnostic(definednumber, sku) values ($1, $2) returning id`,
+	var id uint64
+	if err = tx.QueryRow(ctx, `
+		insert into diagnostic(defined_number, sku, created_at, updated_at) 
+		values ($1, $2, timestamptz(current_timestamp), timestamptz(current_timestamp)) 
+		returning id`,
 		diag.DefinedNumber, diag.SKU,
 	).Scan(&id); err != nil {
 		return domain.Diagnostic{}, fmt.Errorf("cant scan id %w", err)
@@ -47,7 +49,7 @@ func (p PostgresRepo) Create(ctx context.Context, diag domain.Diagnostic) (domai
 	log.Debug().Msgf("inserted rows: %v", ins)
 
 	return domain.Diagnostic{
-		ID:            int64(id),
+		ID:            id,
 		DefinedNumber: diag.DefinedNumber,
 		SKU:           diag.SKU,
 		Images:        diag.Images,
@@ -59,10 +61,27 @@ func (p PostgresRepo) Update(ctx context.Context, diag *domain.Diagnostic) error
 }
 
 func (p PostgresRepo) List(ctx context.Context) ([]domain.Diagnostic, error) {
-	return []domain.Diagnostic{{
-		ID:            1,
-		DefinedNumber: "32",
-		SKU:           "32",
-		Images:        nil,
-	}}, nil
+	rows, err := p.db.Query(ctx, `
+		select id, "version", created_at, updated_at, sku, defined_number
+		from diagnostic_view 
+		limit 50`)
+	if err != nil {
+		return nil, fmt.Errorf("cant query list diagnostic %w", err)
+	}
+	defer rows.Close()
+
+	diagRows := make([]domain.Diagnostic, 0, 50)
+	for rows.Next() {
+		var diag domain.Diagnostic
+		if err = rows.Scan(
+			&diag.ID, &diag.Version, &diag.CreatedAt, &diag.UpdatedAt,
+			&diag.SKU, &diag.DefinedNumber,
+		); err != nil {
+			return nil, fmt.Errorf("cant scan row %w", err)
+		}
+
+		diagRows = append(diagRows, diag)
+	}
+
+	return diagRows, nil
 }

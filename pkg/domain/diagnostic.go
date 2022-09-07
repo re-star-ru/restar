@@ -3,14 +3,15 @@ package domain
 import "time"
 
 type Diagnostic struct {
-	ID        int64
+	ID      uint64
+	Version uint32
+
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
 	DefinedNumber string
 	SKU           string
 
-	Items []Item
-
+	Items  []Item
 	Images []Image
 }

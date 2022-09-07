@@ -10,27 +10,30 @@ message Image {
   string path = 3;
 }
 
-enum ItemType {
-  ITEM_TYPE_UNKNOWN = 0;
-  ITEM_TYPE_PRODUCT = 1;
-  ITEM_TYPE_SERVICE = 2;
-}
-
 message Item {
   int64 id = 1;
+
+  enum ItemType {
+    ITEM_TYPE_UNKNOWN = 0;
+    ITEM_TYPE_PRODUCT = 1;
+    ITEM_TYPE_SERVICE = 2;
+  }
   ItemType itemType = 2;
+
   string name = 3;
 }
 
 message Diagnostic {
-  int64 id = 1;
-  google.protobuf.Timestamp createdAt = 2;
-  google.protobuf.Timestamp updatedAt = 3;
-  string definedNumber = 4;
-  string sku = 5;
+  uint64 id = 1;
+  uint32 version = 2;
+  google.protobuf.Timestamp createdAt = 3;
+  google.protobuf.Timestamp updatedAt = 4;
 
-  repeated Item items = 6;
-  repeated Image images = 7;
+  string definedNumber = 5;
+  string SKU = 6;
+
+  repeated Item items = 7;
+  repeated Image images = 8;
 }
 
 message DiagnosticList {
