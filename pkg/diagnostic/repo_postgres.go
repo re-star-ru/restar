@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v4"
-	"github.com/rs/zerolog/log"
 	"restar/pkg/domain"
 )
 
@@ -23,37 +22,17 @@ func (p PostgresRepo) Create(ctx context.Context, diag domain.Diagnostic) (domai
 	}
 	defer tx.Rollback(ctx)
 
-	var id uint64
+	resp := domain.Diagnostic{}
 	if err = tx.QueryRow(ctx, `
-		insert into diagnostic(defined_number, sku, created_at, updated_at) 
-		values ($1, $2, timestamptz(current_timestamp), timestamptz(current_timestamp)) 
-		returning id`,
+		insert into diagnostic("version", created_at, updated_at, defined_number, sku) 
+		values (1, timestamptz(current_timestamp), timestamptz(current_timestamp), $1, $2) 
+		returning id, "version", created_at, updated_at`,
 		diag.DefinedNumber, diag.SKU,
-	).Scan(&id); err != nil {
+	).Scan(&resp.ID, &resp.Version, &resp.CreatedAt, &resp.UpdatedAt); err != nil {
 		return domain.Diagnostic{}, fmt.Errorf("cant scan id %w", err)
 	}
 
-	irows := make([][]interface{}, len(diag.Images))
-	for i, v := range diag.Images {
-		irows[i] = []interface{}{v.Path, v.Name}
-	}
-
-	ins, err := tx.CopyFrom(ctx, pgx.Identifier{"image"}, []string{"name", "path"}, pgx.CopyFromRows(irows))
-	if err != nil {
-		return domain.Diagnostic{}, err
-	}
-
-	if err = tx.Commit(ctx); err != nil {
-		return domain.Diagnostic{}, err
-	}
-	log.Debug().Msgf("inserted rows: %v", ins)
-
-	return domain.Diagnostic{
-		ID:            id,
-		DefinedNumber: diag.DefinedNumber,
-		SKU:           diag.SKU,
-		Images:        diag.Images,
-	}, nil
+	return resp, nil
 }
 
 func (p PostgresRepo) Update(ctx context.Context, diag *domain.Diagnostic) error {
