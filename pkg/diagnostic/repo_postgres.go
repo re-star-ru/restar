@@ -3,7 +3,9 @@ package diagnostic
 import (
 	"context"
 	"fmt"
+
 	"github.com/jackc/pgx/v4"
+
 	"restar/pkg/domain"
 )
 
@@ -18,8 +20,9 @@ func NewPostgresRepo(conn *pgx.Conn) *PostgresRepo {
 func (p PostgresRepo) Create(ctx context.Context, diag domain.Diagnostic) (domain.Diagnostic, error) {
 	tx, err := p.db.Begin(ctx)
 	if err != nil {
-		return domain.Diagnostic{}, err
+		return domain.Diagnostic{}, fmt.Errorf("failed to begint tx: %w", err)
 	}
+
 	defer tx.Rollback(ctx)
 
 	resp := domain.Diagnostic{}
@@ -40,6 +43,28 @@ func (p PostgresRepo) Create(ctx context.Context, diag domain.Diagnostic) (domai
 }
 
 func (p PostgresRepo) Update(ctx context.Context, diag *domain.Diagnostic) error {
+	tx, err := p.db.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin tx: %w", err)
+	}
+
+	defer tx.Rollback(ctx)
+
+	err = tx.QueryRow(ctx, `
+		insert into diagnostic(id, "version", created_at, updated_at, defined_number, sku)
+		select id, "version"+1, created_at, timestamptz(current_timestamp), $2, $3
+		from diagnostic_view where id=$1
+		returning "version", updated_at`,
+		diag.ID, diag.DefinedNumber, diag.SKU,
+	).Scan(&diag.Version, &diag.UpdatedAt)
+
+	if err != nil {
+		return fmt.Errorf("failed to update: %w", err)
+	}
+
+	if err = tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commin update: %w", err)
+	}
 
 	return nil
 }
@@ -56,6 +81,7 @@ func (p PostgresRepo) List(ctx context.Context) ([]domain.Diagnostic, error) {
 	defer rows.Close()
 
 	diagRows := make([]domain.Diagnostic, 0, 50)
+
 	for rows.Next() {
 		var diag domain.Diagnostic
 		if err = rows.Scan(

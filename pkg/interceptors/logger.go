@@ -11,7 +11,12 @@ import (
 
 // ZerologUnaryServerInterceptor returns a new unary server interceptors that adds zerolog.Logger to the context.
 func ZerologUnaryServerInterceptor() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	return func(
+		ctx context.Context,
+		req interface{},
+		info *grpc.UnaryServerInfo,
+		handler grpc.UnaryHandler,
+	) (interface{}, error) {
 		startTime := time.Now()
 		resp, err := handler(ctx, req)
 		code := grpclogging.DefaultErrorToCode(err)

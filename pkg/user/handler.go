@@ -2,10 +2,12 @@ package user
 
 import (
 	"context"
+	"strconv"
+
 	"google.golang.org/grpc"
+
 	"restar/pkg/domain"
 	"restar/pkg/user/pb"
-	"strconv"
 )
 
 type IUser interface {

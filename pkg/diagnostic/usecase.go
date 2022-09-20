@@ -2,6 +2,8 @@ package diagnostic
 
 import (
 	"context"
+	"fmt"
+
 	"restar/pkg/domain"
 )
 
@@ -20,11 +22,21 @@ func NewUsecase(repo Repo) *Usecase {
 }
 
 func (uc *Usecase) Create(ctx context.Context, diag domain.Diagnostic) (domain.Diagnostic, error) {
-	return uc.repo.Create(ctx, diag)
+	d, err := uc.repo.Create(ctx, diag)
+	if err != nil {
+		return domain.Diagnostic{}, fmt.Errorf("failed to create diagnostic :%w", err)
+	}
+
+	return d, nil
 }
 
 func (uc *Usecase) Update(ctx context.Context, diag *domain.Diagnostic) error {
-	return uc.repo.Update(ctx, diag)
+	err := uc.repo.Update(ctx, diag)
+	if err != nil {
+		return fmt.Errorf("failed to update diag, %w, %+v", err, diag)
+	}
+
+	return nil
 }
 
 func (uc *Usecase) Delete(ctx context.Context, id int64) error {
@@ -36,5 +48,10 @@ func (uc *Usecase) Read(ctx context.Context, id int64) (domain.Diagnostic, error
 }
 
 func (uc *Usecase) List(ctx context.Context) ([]domain.Diagnostic, error) {
-	return uc.repo.List(ctx)
+	list, err := uc.repo.List(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to %w", err)
+	}
+
+	return list, nil
 }

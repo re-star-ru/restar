@@ -3,10 +3,12 @@ package diagnostic
 import (
 	"context"
 	"fmt"
+
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
 	"restar/pkg/diagnostic/pb"
 	"restar/pkg/domain"
 )
@@ -30,6 +32,7 @@ func (ds GRPCHandler) Create(ctx context.Context, _ *emptypb.Empty) (*pb.Diagnos
 	diag, err := ds.usecase.Create(ctx, domain.Diagnostic{})
 	if err != nil {
 		log.Err(err).Msg("cant create diagnostic")
+
 		return nil, err
 	}
 
@@ -71,7 +74,7 @@ func (ds GRPCHandler) List(ctx context.Context, _ *emptypb.Empty) (*pb.Diagnosti
 		return nil, fmt.Errorf("cant get list of diagnostic %w", err)
 	}
 
-	var pbList = make([]*pb.Diagnostic, len(list))
+	pbList := make([]*pb.Diagnostic, len(list))
 	for i, v := range list {
 		pbList[i] = &pb.Diagnostic{
 			Id:            v.ID,
@@ -84,5 +87,4 @@ func (ds GRPCHandler) List(ctx context.Context, _ *emptypb.Empty) (*pb.Diagnosti
 	}
 
 	return &pb.DiagnosticList{List: pbList}, nil
-
 }

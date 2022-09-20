@@ -62,6 +62,7 @@ func run(c configs.Config) {
 	conn, err := pgx.Connect(ctx, c.Postgres)
 	if err != nil {
 		log.Error().Err(err).Msg("cant connect to postgres")
+
 		return
 	}
 

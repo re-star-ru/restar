@@ -25,6 +25,8 @@ test:
 	docker compose -p restar-test -f ./test/docker-compose.yaml down || true
 	docker compose -p restar-test -f ./test/docker-compose.yaml up -d
 	go test ./test/... -v -coverpkg=./... -coverprofile=coverage.out || true
+
+coverage:
 	go tool cover -html=coverage.out
 
 .PHONY: example test

@@ -1,0 +1,34 @@
+run:
+  skip-dirs:
+    - test
+
+linters:
+  enable-all: true
+  disable:
+    - maligned
+    - golint
+    - ifshort
+    - interfacer
+    - varcheck
+    - deadcode
+    - exhaustivestruct
+    - structcheck
+    - scopelint
+    - nosnakecase
+    - rowserrcheck
+    - sqlclosecheck
+    - wastedassign
+    - gofumpt
+    - gci
+    - nonamedreturns
+    - exhaustive
+    - exhaustivestruct
+    - exhaustruct
+    - varnamelen
+    - gomnd
+
+issues:
+  exclude-rules:
+    - linters:
+        - errcheck
+      source: "tx.Rollback"

@@ -2,6 +2,9 @@ package test
 
 import (
 	"context"
+	"net"
+	"testing"
+
 	"github.com/avast/retry-go/v4"
 	"github.com/jackc/pgx/v4"
 	"github.com/rs/zerolog/log"
@@ -9,10 +12,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"net"
+
 	"restar/pkg/diagnostic"
 	"restar/pkg/diagnostic/pb"
-	"testing"
 )
 
 const testConn = "127.0.0.1:40444"
@@ -88,7 +90,6 @@ func TestGRPC(t *testing.T) {
 	require.NotNil(t, conn)
 
 	diagClient = pb.NewDiagnosticServiceClient(conn)
-
 	ctx := context.Background()
 
 	for _, tc := range tcs {
@@ -109,7 +110,7 @@ var tcs = []testCase{
 		test: func(ctx context.Context, t *testing.T) {
 			create, err := diagClient.Create(ctx, &emptypb.Empty{})
 			require.NoError(t, err)
-			require.Equal(t, 1, create.Id)
+			require.EqualValues(t, 1, create.Id)
 		},
 	},
 	{
@@ -117,19 +118,39 @@ var tcs = []testCase{
 		test: func(ctx context.Context, t *testing.T) {
 			create, err := diagClient.Create(ctx, &emptypb.Empty{})
 			require.NoError(t, err)
-			require.Equal(t, 2, create.Id)
+			require.EqualValues(t, 2, create.Id)
+		},
+	},
+	{
+		name: "list documents",
+		test: func(ctx context.Context, t *testing.T) {
+			list, err := diagClient.List(ctx, &emptypb.Empty{})
+			require.NoError(t, err)
+			require.Equal(t, 2, len(list.List))
 		},
 	},
 	{
 		name: "update first document",
 		test: func(ctx context.Context, t *testing.T) {
-			_, err := diagClient.Update(ctx, &pb.Diagnostic{
-				Version:       1,
+			up, err := diagClient.Update(ctx, &pb.Diagnostic{
+				Id:            1,
 				DefinedNumber: "defined",
 				SKU:           "updated",
 			})
 
 			require.NoError(t, err)
+			require.Equal(t, "defined", up.DefinedNumber)
+			require.EqualValues(t, 2, up.Version)
+		},
+	},
+	{
+		name: "update unknown document",
+		test: func(ctx context.Context, t *testing.T) {
+			_, err := diagClient.Update(ctx, &pb.Diagnostic{
+				Id: 9999,
+			})
+
+			require.Error(t, err)
 		},
 	},
 }
