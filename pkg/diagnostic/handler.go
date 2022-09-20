@@ -17,7 +17,13 @@ type GRPCHandler struct {
 }
 
 func RegisterService(srv grpc.ServiceRegistrar, usecase *Usecase) {
-	pb.RegisterDiagnosticServiceServer(srv, &GRPCHandler{usecase: usecase})
+	pb.RegisterDiagnosticServiceServer(srv, NewGRPCHandler(usecase))
+}
+
+func NewGRPCHandler(usecase *Usecase) *GRPCHandler {
+	return &GRPCHandler{
+		usecase: usecase,
+	}
 }
 
 func (ds GRPCHandler) Create(ctx context.Context, _ *emptypb.Empty) (*pb.Diagnostic, error) {

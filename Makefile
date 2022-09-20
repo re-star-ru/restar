@@ -22,8 +22,9 @@ example:
 	CGO_ENABLED=0 go run ./example
 
 test:
-	sudo docker compose -p restar-test -f ./test/docker-compose.yaml down
-	sudo docker compose -p restar-test -f ./test/docker-compose.yaml up -d
-	go test ./test/...
+	docker compose -p restar-test -f ./test/docker-compose.yaml down || true
+	docker compose -p restar-test -f ./test/docker-compose.yaml up -d
+	go test ./test/... -v -coverpkg=./... -coverprofile=coverage.out || true
+	go tool cover -html=coverage.out
 
 .PHONY: example test
