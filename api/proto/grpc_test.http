@@ -2,7 +2,7 @@
 GRPC {{host}}/UserService/UserInfo
 
 {
-  "id": "фыв"
+  "id": "asd"
 }
 
 ### create diagnostic request

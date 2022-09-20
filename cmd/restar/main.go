@@ -2,20 +2,10 @@ package main
 
 import (
 	"context"
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
-	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
-	"github.com/jackc/pgx/v4"
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 	"math/rand"
 	"net"
 	"net/http"
 	"os"
-	"restar/configs"
-	"restar/pkg/diagnostic"
-	"restar/pkg/user"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -23,14 +13,29 @@ import (
 	"github.com/go-pkgz/rest/logger"
 	"github.com/google/uuid"
 	"github.com/grandcat/zeroconf"
+	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpcrecovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	"github.com/jackc/pgx/v4"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+
+	"restar/configs"
+	"restar/pkg/diagnostic"
+	"restar/pkg/interceptors"
+	"restar/pkg/user"
 )
 
 func main() {
 	config := configs.NewConfig()
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnixMs
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.StampMilli})
+
+	s := zerolog.NewConsoleWriter()
+	s.Out = os.Stderr
+	s.TimeFormat = time.StampMilli
+
+	log.Logger = log.Output(s)
 
 	go runHealth(config)
 	run(config)
@@ -38,10 +43,9 @@ func main() {
 
 func run(c configs.Config) {
 	// setup logging and recovery
-	zl, _ := zap.NewDevelopment()
-	srv := grpc.NewServer(grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
-		grpc_zap.UnaryServerInterceptor(zl.WithOptions(zap.AddCallerSkip(4))),
-		grpc_recovery.UnaryServerInterceptor(),
+	srv := grpc.NewServer(grpc.UnaryInterceptor(grpcmiddleware.ChainUnaryServer(
+		interceptors.ZerologUnaryServerInterceptor(),
+		grpcrecovery.UnaryServerInterceptor(),
 	)))
 	reflection.Register(srv)
 
@@ -79,7 +83,18 @@ func runHealth(c configs.Config) {
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) { rest.RenderJSON(w, "Instance id: "+instanceID) })
 
 	log.Print("health listen at:", c.DiscoveryHost)
-	log.Fatal().Err(http.ListenAndServe(c.DiscoveryHost, r)).Send()
+
+	timeout := time.Second * 5
+	server := &http.Server{
+		Addr:              c.DiscoveryHost,
+		Handler:           r,
+		ReadTimeout:       timeout,
+		ReadHeaderTimeout: timeout,
+		WriteTimeout:      timeout,
+		IdleTimeout:       timeout,
+	}
+
+	log.Fatal().Err(server.ListenAndServe()).Send()
 }
 
 func setupPeers(id string) {
