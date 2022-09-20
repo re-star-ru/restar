@@ -18,8 +18,12 @@ generate-go:
 generate-flutter:
 	protoc -Iapi/proto/v1 --dart_out=grpc:api/flutter/v1  api/proto/v1/*.proto
 
-
 example:
 	CGO_ENABLED=0 go run ./example
 
-.PHONY: example
+test:
+	sudo docker compose -p restar-test -f ./test/docker-compose.yaml down
+	sudo docker compose -p restar-test -f ./test/docker-compose.yaml up -d
+	go test ./test/...
+
+.PHONY: example test

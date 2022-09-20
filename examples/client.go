@@ -21,7 +21,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	resp, err := client.UserInfo(ctx, &pb.UserRequest{Id: "wtf"})
+	resp, err := client.UserInfo(ctx, &pb.UserRequest{Id: 23})
 	if err != nil {
 		log.Err(err).Send()
 	}
