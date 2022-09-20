@@ -108,7 +108,19 @@ var tcs = []testCase{
 	{
 		name: "first document",
 		test: func(ctx context.Context, t *testing.T) {
+			t.Helper()
+
 			create, err := diagClient.Create(ctx, &emptypb.Empty{})
+			require.NoError(t, err)
+			require.EqualValues(t, 1, create.Id)
+		},
+	},
+	{
+		name: "read first document",
+		test: func(ctx context.Context, t *testing.T) {
+			t.Helper()
+
+			create, err := diagClient.Read(ctx, &pb.ID{Id: 1})
 			require.NoError(t, err)
 			require.EqualValues(t, 1, create.Id)
 		},
@@ -116,6 +128,8 @@ var tcs = []testCase{
 	{
 		name: "second document",
 		test: func(ctx context.Context, t *testing.T) {
+			t.Helper()
+
 			create, err := diagClient.Create(ctx, &emptypb.Empty{})
 			require.NoError(t, err)
 			require.EqualValues(t, 2, create.Id)
@@ -124,6 +138,8 @@ var tcs = []testCase{
 	{
 		name: "list documents",
 		test: func(ctx context.Context, t *testing.T) {
+			t.Helper()
+
 			list, err := diagClient.List(ctx, &emptypb.Empty{})
 			require.NoError(t, err)
 			require.Equal(t, 2, len(list.List))
@@ -132,6 +148,8 @@ var tcs = []testCase{
 	{
 		name: "update first document",
 		test: func(ctx context.Context, t *testing.T) {
+			t.Helper()
+
 			up, err := diagClient.Update(ctx, &pb.Diagnostic{
 				Id:            1,
 				DefinedNumber: "defined",
@@ -146,6 +164,8 @@ var tcs = []testCase{
 	{
 		name: "update unknown document",
 		test: func(ctx context.Context, t *testing.T) {
+			t.Helper()
+
 			_, err := diagClient.Update(ctx, &pb.Diagnostic{
 				Id: 9999,
 			})

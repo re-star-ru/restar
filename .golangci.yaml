@@ -26,6 +26,7 @@ linters:
     - exhaustruct
     - varnamelen
     - gomnd
+    - gochecknoglobals
 
 issues:
   exclude-rules:

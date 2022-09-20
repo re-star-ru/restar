@@ -58,14 +58,7 @@ func (ds GRPCHandler) Update(ctx context.Context, diagnostic *pb.Diagnostic) (*p
 		return nil, err
 	}
 
-	return &pb.Diagnostic{
-		Id:            diag.ID,
-		Version:       diag.Version,
-		CreatedAt:     timestamppb.New(diag.CreatedAt),
-		UpdatedAt:     timestamppb.New(diag.UpdatedAt),
-		DefinedNumber: diag.DefinedNumber,
-		SKU:           diag.SKU,
-	}, nil
+	return marshalDiagnostic(*diag), nil
 }
 
 func (ds GRPCHandler) List(ctx context.Context, _ *emptypb.Empty) (*pb.DiagnosticList, error) {
@@ -76,15 +69,28 @@ func (ds GRPCHandler) List(ctx context.Context, _ *emptypb.Empty) (*pb.Diagnosti
 
 	pbList := make([]*pb.Diagnostic, len(list))
 	for i, v := range list {
-		pbList[i] = &pb.Diagnostic{
-			Id:            v.ID,
-			Version:       v.Version,
-			CreatedAt:     timestamppb.New(v.CreatedAt),
-			UpdatedAt:     timestamppb.New(v.UpdatedAt),
-			DefinedNumber: v.DefinedNumber,
-			SKU:           v.SKU,
-		}
+		pbList[i] = marshalDiagnostic(v)
 	}
 
 	return &pb.DiagnosticList{List: pbList}, nil
+}
+
+func (ds GRPCHandler) Read(ctx context.Context, id *pb.ID) (*pb.Diagnostic, error) {
+	diag, err := ds.usecase.Read(ctx, id.Id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read document, %w", err)
+	}
+
+	return marshalDiagnostic(diag), nil
+}
+
+func marshalDiagnostic(diag domain.Diagnostic) *pb.Diagnostic {
+	return &pb.Diagnostic{
+		Id:            diag.ID,
+		Version:       diag.Version,
+		CreatedAt:     timestamppb.New(diag.CreatedAt),
+		UpdatedAt:     timestamppb.New(diag.UpdatedAt),
+		DefinedNumber: diag.DefinedNumber,
+		SKU:           diag.SKU,
+	}
 }
