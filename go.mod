@@ -10,6 +10,7 @@ require (
 	github.com/grandcat/zeroconf v1.0.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/jackc/pgx/v4 v4.17.1
+	github.com/mattn/go-sqlite3 v1.14.15
 	github.com/rs/zerolog v1.27.0
 	github.com/stretchr/testify v1.8.0
 	google.golang.org/grpc v1.49.0

@@ -51,7 +51,7 @@ func (ds GRPCHandler) Update(ctx context.Context, diagnostic *pb.Diagnostic) (*p
 		CreatedAt:     diagnostic.CreatedAt.AsTime(),
 		UpdatedAt:     diagnostic.UpdatedAt.AsTime(),
 		DefinedNumber: diagnostic.DefinedNumber,
-		SKU:           diagnostic.SKU,
+		SKU:           diagnostic.Sku,
 	}
 
 	if err := ds.usecase.Update(ctx, diag); err != nil {
@@ -72,7 +72,7 @@ func (ds GRPCHandler) List(ctx context.Context, _ *emptypb.Empty) (*pb.Diagnosti
 		pbList[i] = marshalDiagnostic(v)
 	}
 
-	return &pb.DiagnosticList{List: pbList}, nil
+	return &pb.DiagnosticList{Lists: pbList}, nil
 }
 
 func (ds GRPCHandler) Read(ctx context.Context, id *pb.ID) (*pb.Diagnostic, error) {
@@ -91,6 +91,6 @@ func marshalDiagnostic(diag domain.Diagnostic) *pb.Diagnostic {
 		CreatedAt:     timestamppb.New(diag.CreatedAt),
 		UpdatedAt:     timestamppb.New(diag.UpdatedAt),
 		DefinedNumber: diag.DefinedNumber,
-		SKU:           diag.SKU,
+		Sku:           diag.SKU,
 	}
 }

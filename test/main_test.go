@@ -142,7 +142,7 @@ var tcs = []testCase{
 
 			list, err := diagClient.List(ctx, &emptypb.Empty{})
 			require.NoError(t, err)
-			require.Equal(t, 2, len(list.List))
+			require.Equal(t, 2, len(list.Lists))
 		},
 	},
 	{
@@ -153,7 +153,7 @@ var tcs = []testCase{
 			up, err := diagClient.Update(ctx, &pb.Diagnostic{
 				Id:            1,
 				DefinedNumber: "defined",
-				SKU:           "updated",
+				Sku:           "updated",
 			})
 
 			require.NoError(t, err)
