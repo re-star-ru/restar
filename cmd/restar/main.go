@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"math/rand"
-	"net"
 	"net/http"
 	"os"
 	"time"
@@ -15,19 +14,14 @@ import (
 	"github.com/go-pkgz/rest/logger"
 	"github.com/google/uuid"
 	"github.com/grandcat/zeroconf"
-	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	grpcrecovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/jackc/pgx/v4"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 
 	"restar/configs"
 	"restar/pkg/diagnostic"
 	"restar/pkg/graph"
 	"restar/pkg/graph/generated"
-	"restar/pkg/interceptors"
 	"restar/pkg/user"
 )
 
@@ -45,47 +39,7 @@ func main() {
 	run(config)
 }
 
-func runGraphql(_ configs.Config, ducase *diagnostic.Usecase) {
-	graphqlServer := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
-		Resolvers: graph.NewResolver(ducase),
-	}))
-
-	mux := http.NewServeMux()
-	mux.Handle("/", playground.Handler("Graphql playground", "/query"))
-	mux.Handle("/query", graphqlServer)
-
-	port := "9091"
-	tout := time.Second * 30
-
-	log.Info().Msgf("connect to http://localhost:%s/ for GraphQL playground", port)
-
-	server := &http.Server{
-		Addr:              ":" + port,
-		Handler:           mux,
-		ReadTimeout:       tout,
-		ReadHeaderTimeout: tout,
-		WriteTimeout:      tout,
-		IdleTimeout:       tout,
-	}
-
-	log.Fatal().Err(server.ListenAndServe()).Msg("failed to serve")
-}
-
 func run(c configs.Config) {
-	// setup logging and recovery
-	srv := grpc.NewServer(grpc.UnaryInterceptor(grpcmiddleware.ChainUnaryServer(
-		interceptors.ZerologUnaryServerInterceptor(),
-		grpcrecovery.UnaryServerInterceptor(),
-	)))
-	reflection.Register(srv)
-
-	listen, err := net.Listen("tcp", c.Host)
-	if err != nil {
-		log.Fatal().Err(err).Msg("cant listen grpc service")
-	}
-
-	user.RegisterService(srv, user.NewUserUsecase())
-
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
@@ -96,18 +50,36 @@ func run(c configs.Config) {
 		return
 	}
 
+	userUsecase := user.NewUserUsecase()
+
 	drepo := diagnostic.NewPostgresRepo(conn)
-	ducase := diagnostic.NewUsecase(drepo)
-	diagnostic.RegisterService(srv, ducase)
+	diagnosticUsecase := diagnostic.NewUsecase(drepo)
 
-	go runGraphql(c, ducase)
+	graphqlServer := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
+		Resolvers: graph.NewResolver(diagnosticUsecase, userUsecase),
+	}))
 
-	log.Info().Msgf("restar service listen at %s", c.Host)
-	log.Error().Err(srv.Serve(listen)).Msg("cant serve grpc service")
+	mux := chi.NewRouter()
+	mux.Use(logger.New().Handler)
+	mux.Handle("/", playground.Handler("Graphql playground", "/query"))
+	mux.Handle("/query", graphqlServer)
+
+	server := &http.Server{
+		Addr:              c.Host + ":" + c.Port,
+		Handler:           mux,
+		ReadTimeout:       c.ServerTimeout,
+		ReadHeaderTimeout: c.ServerTimeout,
+		WriteTimeout:      c.ServerTimeout,
+		IdleTimeout:       c.ServerTimeout,
+	}
+
+	log.Info().Msgf("connect to http://localhost:%s/ for GraphQL playground", c.Port)
+	log.Panic().Err(server.ListenAndServe()).Msg("failed to serve")
 }
 
 /////////////////////////// service discovery and else
 
+// region metrics
 func runHealth(c configs.Config) {
 	instanceID := uuid.NewString()
 	setupPeers(instanceID)
@@ -190,3 +162,5 @@ func openRandomPort() int {
 
 	return rand.Intn(end-start+1) + start //nolint:gosec
 }
+
+// endregion

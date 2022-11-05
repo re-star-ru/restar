@@ -1,15 +1,29 @@
-### test user request
-GRPC {{host}}/UserService/UserInfo
+### DiagnosticList
+GRAPHQL http://localhost:9091/query
+Content-Type: application/json
 
-{
-  "id": "asd"
+query DiagnosticList {
+    diagnosticList {
+        id
+        version
+        createdAt
+        updatedAt
+        sku
+        definedNumber
+    }
 }
 
-### create diagnostic request
-GRPC {{host}}/DiagnosticService/Create
+### Create diagnostic
+GRAPHQL http://localhost:9091/query
+Content-Type: application/json
 
-### update
-GRPC {{host}}/DiagnosticService/Update
-
-### list
-GRPC {{host}}/DiagnosticService/List
+mutation CreateDiagnostic {
+    createDiagnostic {
+        id
+        version
+        createdAt
+        updatedAt
+        sku
+        definedNumber
+    }
+}

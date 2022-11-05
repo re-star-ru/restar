@@ -1,6 +1,8 @@
 run:
   skip-dirs:
     - test
+  skip-files:
+    - ".resolvers.go"
 
 linters:
   enable-all: true
@@ -28,6 +30,8 @@ linters:
     - gomnd
     - gochecknoglobals
     - ireturn
+
+
 
 issues:
   exclude-rules:

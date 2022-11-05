@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+type CreateUser struct {
+	Name string `json:"name"`
+}
+
+// Diagnostic это документ диагностики который может быть привязан к талону ремонта
 type Diagnostic struct {
 	ID            int       `json:"id"`
 	Version       int       `json:"version"`
@@ -15,6 +20,13 @@ type Diagnostic struct {
 	Sku           string    `json:"sku"`
 }
 
+type UpdateDiagnostic struct {
+	ID            int    `json:"id"`
+	DefinedNumber string `json:"definedNumber"`
+	Sku           string `json:"sku"`
+}
+
+// User is out user
 type User struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
