@@ -3,8 +3,8 @@ package domain
 import "time"
 
 type Diagnostic struct {
-	ID      uint64
-	Version uint32
+	ID      int
+	Version int
 
 	CreatedAt time.Time
 	UpdatedAt time.Time

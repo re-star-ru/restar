@@ -1,19 +1,19 @@
-create table "user" ( id bigserial primary key, "name" text );
+create table "user" ( id serial primary key, "name" text );
 
 create table
     image (
-        id bigserial primary key,
+        id serial primary key,
         "name" text,
         path text
     );
 
-create table product ( id bigserial primary key, name text );
+create table product ( id serial primary key, name text );
 
 drop table if exists diagnostic;
 
 create table
     diagnostic (
-        id bigserial,
+        id serial,
         "version" serial,
         primary key (id, "version"),
         created_at timestamptz not null,

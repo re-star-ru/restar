@@ -42,7 +42,7 @@ func (p PostgresRepo) Create(ctx context.Context, diag domain.Diagnostic) (domai
 	return resp, nil
 }
 
-func (p PostgresRepo) Read(ctx context.Context, id uint64) (domain.Diagnostic, error) {
+func (p PostgresRepo) Read(ctx context.Context, id int) (domain.Diagnostic, error) {
 	diag := domain.Diagnostic{ID: id}
 
 	err := p.db.QueryRow(ctx, `

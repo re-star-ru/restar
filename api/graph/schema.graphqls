@@ -1,0 +1,42 @@
+# GraphQL schema
+#
+# https://gqlgen.com/getting-started/
+
+# type sodo {
+#  id: ID!
+#  text: String!
+#  done: Boolean!
+#  user: User!
+# }
+
+scalar Time
+
+type User {
+  id: Int!
+  name: String!
+}
+
+type Diagnostic {
+  id: Int!
+  version: Int!
+  createdAt: Time!
+  updatedAt: Time!
+
+  definedNumber: String!
+  sku: String!
+}
+
+type Query {
+  diagnosticList: [Diagnostic!]!
+  diagnostic(id: Int!): Diagnostic!
+}
+
+#input NewTodo {
+#  text: String!
+#  userId: String!
+#}
+
+type Mutation {
+  createDiagnostic: Diagnostic!
+#  createTodo(input: NewTodo!): Todo!
+}

@@ -37,17 +37,6 @@ message Diagnostic {
   repeated Image images = 8;
 }
 
-message DiagnosticList {
-  repeated Diagnostic lists = 1;
-}
-
-message ID {
-  uint64 id = 1;
-}
-
 service DiagnosticService {
-  rpc Create(google.protobuf.Empty) returns (Diagnostic) {}
-  rpc Read(ID) returns (Diagnostic) {}
   rpc Update(Diagnostic) returns (Diagnostic) {}
-  rpc List(google.protobuf.Empty) returns (DiagnosticList) {}
 }

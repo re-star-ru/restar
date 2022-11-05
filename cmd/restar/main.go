@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-pkgz/rest"
 	"github.com/go-pkgz/rest/logger"
@@ -23,6 +25,8 @@ import (
 
 	"restar/configs"
 	"restar/pkg/diagnostic"
+	"restar/pkg/graph"
+	"restar/pkg/graph/generated"
 	"restar/pkg/interceptors"
 	"restar/pkg/user"
 )
@@ -39,6 +43,32 @@ func main() {
 
 	go runHealth(config)
 	run(config)
+}
+
+func runGraphql(_ configs.Config, ducase *diagnostic.Usecase) {
+	graphqlServer := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
+		Resolvers: graph.NewResolver(ducase),
+	}))
+
+	mux := http.NewServeMux()
+	mux.Handle("/", playground.Handler("Graphql playground", "/query"))
+	mux.Handle("/query", graphqlServer)
+
+	port := "9091"
+	tout := time.Second * 30
+
+	log.Info().Msgf("connect to http://localhost:%s/ for GraphQL playground", port)
+
+	server := &http.Server{
+		Addr:              ":" + port,
+		Handler:           mux,
+		ReadTimeout:       tout,
+		ReadHeaderTimeout: tout,
+		WriteTimeout:      tout,
+		IdleTimeout:       tout,
+	}
+
+	log.Fatal().Err(server.ListenAndServe()).Msg("failed to serve")
 }
 
 func run(c configs.Config) {
@@ -67,7 +97,10 @@ func run(c configs.Config) {
 	}
 
 	drepo := diagnostic.NewPostgresRepo(conn)
-	diagnostic.RegisterService(srv, diagnostic.NewUsecase(drepo))
+	ducase := diagnostic.NewUsecase(drepo)
+	diagnostic.RegisterService(srv, ducase)
+
+	go runGraphql(c, ducase)
 
 	log.Info().Msgf("restar service listen at %s", c.Host)
 	log.Error().Err(srv.Serve(listen)).Msg("cant serve grpc service")

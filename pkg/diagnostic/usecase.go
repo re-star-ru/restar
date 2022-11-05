@@ -9,7 +9,7 @@ import (
 
 type Repo interface {
 	Create(context.Context, domain.Diagnostic) (domain.Diagnostic, error)
-	Read(ctx context.Context, id uint64) (domain.Diagnostic, error)
+	Read(ctx context.Context, id int) (domain.Diagnostic, error)
 	Update(context.Context, *domain.Diagnostic) error
 	List(context.Context) ([]domain.Diagnostic, error)
 }
@@ -44,7 +44,7 @@ func (uc *Usecase) Delete(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (uc *Usecase) Read(ctx context.Context, id uint64) (domain.Diagnostic, error) {
+func (uc *Usecase) Read(ctx context.Context, id int) (domain.Diagnostic, error) {
 	d, err := uc.repo.Read(ctx, id)
 	if err != nil {
 		return domain.Diagnostic{}, fmt.Errorf("failed to read diagnostic: %w", err)

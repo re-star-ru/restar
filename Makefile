@@ -10,7 +10,10 @@ down-dev-server:
 build:
 	CGO_ENABLED=0 go build -o ./.bin ./cmd/restar
 
-generate: generate-go generate-flutter
+#generate: generate-go generate-flutter
+
+generate:
+	go generate ./...
 
 generate-go:
 	protoc --go_out . --go-grpc_out=. ./api/proto/v1/*.proto

@@ -27,6 +27,7 @@ linters:
     - varnamelen
     - gomnd
     - gochecknoglobals
+    - ireturn
 
 issues:
   exclude-rules:
