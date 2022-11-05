@@ -1,21 +1,24 @@
-# GraphQL schema
-#
-# https://gqlgen.com/getting-started/
+"""
+GraphQL schema restar
+https://gqlgen.com/getting-started/
 
-# type sodo {
-#  id: ID!
-#  text: String!
-#  done: Boolean!
-#  user: User!
-# }
+хороший ui для просмотра графа зависимостей graphql
+https://ivangoncharov.github.io/graphql-voyager/
+"""
 
 scalar Time
 
+"""
+User is out user
+"""
 type User {
   id: Int!
   name: String!
 }
 
+"""
+Diagnostic это документ диагностики который может быть привязан к талону ремонта
+"""
 type Diagnostic {
   id: Int!
   version: Int!
@@ -27,16 +30,26 @@ type Diagnostic {
 }
 
 type Query {
+  userList: User!
+
   diagnosticList: [Diagnostic!]!
   diagnostic(id: Int!): Diagnostic!
 }
 
-#input NewTodo {
-#  text: String!
-#  userId: String!
-#}
-
 type Mutation {
+  createUser(input: CreateUser!): User!
+
   createDiagnostic: Diagnostic!
-#  createTodo(input: NewTodo!): Todo!
+  updateDiagnostic(input: UpdateDiagnostic!): Diagnostic!
+}
+
+input CreateUser {
+  name: String!
+}
+
+input UpdateDiagnostic {
+  id: Int!
+
+  definedNumber: String!
+  sku: String!
 }
