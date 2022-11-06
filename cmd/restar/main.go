@@ -7,11 +7,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/handler/extension"
-	"github.com/99designs/gqlgen/graphql/handler/lru"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-pkgz/rest"
@@ -21,6 +16,12 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/lru"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/playground"
 
 	"restar/configs"
 	"restar/pkg/attachment"
@@ -71,9 +72,14 @@ func run(c configs.Config) {
 	graphqlServer.AddTransport(transport.Options{})
 	graphqlServer.AddTransport(transport.GET{})
 	graphqlServer.AddTransport(transport.POST{})
-	graphqlServer.AddTransport(transport.MultipartForm{
-		MaxMemory:     64 * (1 << 20),
-		MaxUploadSize: 4096 * (1 << 20),
+
+	// graphqlServer.AddTransport(transport.MultipartForm{
+	//	MaxMemory:     64 * (1 << 20),
+	//	MaxUploadSize: 4096 * (1 << 20),
+	// })
+
+	graphqlServer.AddTransport(attachment.ReadableMultipartForm{
+		MaxUploadSize: 4096 * (1 << 20), // 4gb
 	})
 
 	graphqlServer.SetQueryCache(lru.New(1000))
@@ -106,7 +112,7 @@ func run(c configs.Config) {
 
 /////////////////////////// service discovery and else
 
-// region metrics
+// region metrics.
 func runHealth(c configs.Config) {
 	instanceID := uuid.NewString()
 	setupPeers(instanceID)

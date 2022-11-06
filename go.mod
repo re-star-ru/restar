@@ -13,6 +13,8 @@ require (
 	github.com/vektah/gqlparser/v2 v2.5.1
 )
 
+//replace github.com/99designs/gqlgen => ../gqlgen
+
 require (
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
@@ -29,7 +31,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/miekg/dns v1.1.27 // indirect
-	github.com/mitchellh/mapstructure v1.3.1 // indirect
+	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/urfave/cli/v2 v2.8.1 // indirect

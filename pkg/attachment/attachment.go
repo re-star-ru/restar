@@ -26,6 +26,13 @@ func NewAttachment(cfg configs.Config) *Repo {
 func (r *Repo) PutFile(ctx context.Context, upload domain.Upload) {
 	log.Debug().Msgf("upload: %v, %v, %v, %v", upload.File, upload.Filename, upload.ContentType, upload.Size)
 
+	//ffff, err := io.ReadAll(upload.File)
+	//if err != nil {
+	//	log.Err(err).Msg("caint read all file")
+	//}
+	//
+	//log.Debug().Msgf("FILE: size %v", len(ffff))
+
 	resp, status, err := r.uploadd(ctx, upload.File, upload.Filename)
 
 	log.Debug().Err(err).Msgf("status: %s, code: %d", string(resp), status)

@@ -46,7 +46,7 @@ Content-Disposition: form-data; name="map"
 { "0": ["variables.file"] }
 
 --boundary
-Content-Disposition: form-data; name="0"; filename="cat.jpg"
+Content-Disposition: form-data; name="0"; filename="cat.jpg"; size=1123123
 Content-Type: image/jpeg
 
 < cat.jpg

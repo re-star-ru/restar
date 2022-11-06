@@ -32,7 +32,6 @@ linters:
     - ireturn
 
 
-
 issues:
   exclude-rules:
     - linters:

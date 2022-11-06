@@ -24,7 +24,9 @@ services:
       - 7333:7333 # webdav ui
 
     volumes:
-      - ../../.bin/storage:/data
+#      - ../../.bin/storage:/data
+      - /media/fess932/ssd2/target:/data
+
 
   fulltext:
     image: getmeili/meilisearch:v0.29.1
