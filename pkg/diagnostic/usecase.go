@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"restar/pkg/attachment"
 	"restar/pkg/domain"
 )
 
@@ -15,11 +16,12 @@ type Repo interface {
 }
 
 type Usecase struct {
-	repo Repo
+	repo   Repo
+	attach *attachment.Repo
 }
 
-func NewUsecase(repo Repo) *Usecase {
-	return &Usecase{repo}
+func NewUsecase(repo Repo, attach *attachment.Repo) *Usecase {
+	return &Usecase{repo, attach}
 }
 
 func (uc *Usecase) Create(ctx context.Context, diag domain.Diagnostic) (domain.Diagnostic, error) {
@@ -60,4 +62,10 @@ func (uc *Usecase) List(ctx context.Context) ([]domain.Diagnostic, error) {
 	}
 
 	return list, nil
+}
+
+func (uc *Usecase) UploadFile(ctx context.Context, upload domain.Upload) error {
+	uc.attach.PutFile(ctx, upload)
+
+	return nil
 }

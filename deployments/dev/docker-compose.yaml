@@ -14,19 +14,20 @@ services:
       - ../../configs/sql:/docker-entrypoint-initdb.d
 
   storage:
-    image: chrislusf/seaweedfs:3.23
-    command: 'server -s3 -dir /data'
+    image: chrislusf/seaweedfs:3.33
+    command: 'server -webdav -s3 -dir /data'
     ports:
       - 8333:8333 # s3 api
       - 9333:9333 # cluster ui
       - 8080:8080 # node ui
       - 8888:8888 # filer ui
+      - 7333:7333 # webdav ui
 
     volumes:
       - ../../.bin/storage:/data
 
   fulltext:
-    image: getmeili/meilisearch:v0.28.1
+    image: getmeili/meilisearch:v0.29.1
     environment:
       - MEILI_DB_PATH=/data.ms
     ports:

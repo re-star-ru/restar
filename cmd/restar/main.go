@@ -8,8 +8,12 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/lru"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-pkgz/rest"
 	"github.com/go-pkgz/rest/logger"
 	"github.com/google/uuid"
@@ -19,6 +23,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"restar/configs"
+	"restar/pkg/attachment"
 	"restar/pkg/diagnostic"
 	"restar/pkg/graph"
 	"restar/pkg/graph/generated"
@@ -50,19 +55,41 @@ func run(c configs.Config) {
 		return
 	}
 
+	attachUsecase := attachment.NewAttachment(c)
+
 	userUsecase := user.NewUserUsecase()
 
 	drepo := diagnostic.NewPostgresRepo(conn)
-	diagnosticUsecase := diagnostic.NewUsecase(drepo)
 
-	graphqlServer := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
+	diagnosticUsecase := diagnostic.NewUsecase(drepo, attachUsecase)
+
+	graphqlServer := handler.New(generated.NewExecutableSchema(generated.Config{
 		Resolvers: graph.NewResolver(diagnosticUsecase, userUsecase),
 	}))
 
+	graphqlServer.AddTransport(transport.Websocket{KeepAlivePingInterval: 10 * time.Second})
+	graphqlServer.AddTransport(transport.Options{})
+	graphqlServer.AddTransport(transport.GET{})
+	graphqlServer.AddTransport(transport.POST{})
+	graphqlServer.AddTransport(transport.MultipartForm{
+		MaxMemory:     64 * (1 << 20),
+		MaxUploadSize: 4096 * (1 << 20),
+	})
+
+	graphqlServer.SetQueryCache(lru.New(1000))
+	graphqlServer.Use(extension.Introspection{})
+	graphqlServer.Use(extension.AutomaticPersistedQuery{
+		Cache: lru.New(100),
+	})
+
 	mux := chi.NewRouter()
-	mux.Use(logger.New().Handler)
+
+	middlwareLogger := logger.New()
+	mux.Use(middlwareLogger.Handler)
+
 	mux.Handle("/", playground.Handler("Graphql playground", "/query"))
 	mux.Handle("/query", graphqlServer)
+	mux.Mount("/debug", middleware.Profiler())
 
 	server := &http.Server{
 		Addr:              c.Host + ":" + c.Port,

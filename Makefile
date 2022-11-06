@@ -4,7 +4,7 @@ run:
 	CGO_ENABLED=0 go run ./cmd/restar
 
 dev-server:
-	docker compose -f ./deployments/dev/docker-compose.yaml up db
+	docker compose -f ./deployments/dev/docker-compose.yaml up db storage
 down-dev-server:
 	sudo rm -rf ./.bin/db
 	docker compose -f ./deployments/dev/docker-compose.yaml down

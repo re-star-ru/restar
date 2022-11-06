@@ -7,6 +7,7 @@ https://ivangoncharov.github.io/graphql-voyager/
 """
 
 scalar Time
+scalar Upload
 
 """
 User is out user
@@ -41,6 +42,7 @@ type Mutation {
 
   createDiagnostic: Diagnostic!
   updateDiagnostic(input: UpdateDiagnostic!): Diagnostic!
+  diagnosticUploadFile(file: Upload!): Boolean!
 }
 
 input CreateUser {

@@ -6,10 +6,12 @@ package graph
 import (
 	"context"
 	"fmt"
-
 	"restar/pkg/domain"
 	"restar/pkg/graph/generated"
 	"restar/pkg/graph/model"
+
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/rs/zerolog/log"
 )
 
 // CreateUser is the resolver for the createUser field.
@@ -62,6 +64,27 @@ func (r *mutationResolver) UpdateDiagnostic(ctx context.Context, input model.Upd
 	return marshalDiagnostic(diag), nil
 }
 
+// DiagnosticUploadFile is the resolver for the diagnosticUploadFile field.
+func (r *mutationResolver) DiagnosticUploadFile(ctx context.Context, file graphql.Upload) (bool, error) {
+	log.Debug().Msgf("DiagnosticUploadFile ok")
+
+	//buf, err := io.ReadAll(file.File)
+	//if err != nil {
+	//	return false, fmt.Errorf("failed to read file: %w", err)
+	//}
+
+	if err := r.diagnostic.UploadFile(ctx, domain.Upload{
+		File:        file.File,
+		Filename:    file.Filename,
+		Size:        file.Size,
+		ContentType: file.ContentType,
+	}); err != nil {
+		return false, fmt.Errorf("failed to upload file: %w", err)
+	}
+
+	return true, nil
+}
+
 // UserList is the resolver for the userList field.
 func (r *queryResolver) UserList(ctx context.Context) (*model.User, error) {
 	panic(fmt.Errorf("not implemented: UserList - userList"))
@@ -98,7 +121,5 @@ func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResol
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
-type (
-	mutationResolver struct{ *Resolver }
-	queryResolver    struct{ *Resolver }
-)
+type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }

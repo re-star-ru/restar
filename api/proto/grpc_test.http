@@ -1,5 +1,5 @@
 ### DiagnosticList
-GRAPHQL http://localhost:9091/query
+GRAPHQL http://localhost:8090/query
 Content-Type: application/json
 
 query DiagnosticList {
@@ -14,7 +14,7 @@ query DiagnosticList {
 }
 
 ### Create diagnostic
-GRAPHQL http://localhost:9091/query
+GRAPHQL http://localhost:8090/query
 Content-Type: application/json
 
 mutation CreateDiagnostic {
@@ -27,3 +27,26 @@ mutation CreateDiagnostic {
         definedNumber
     }
 }
+
+### Upload file to diagnostic
+POST http://localhost:8090/query
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="operations"
+
+{
+  "query": "mutation ($file: Upload!) { diagnosticUploadFile(file: $file) }",
+  "variables": { "file": null }
+}
+
+--boundary
+Content-Disposition: form-data; name="map"
+
+{ "0": ["variables.file"] }
+
+--boundary
+Content-Disposition: form-data; name="0"; filename="cat.jpg"
+Content-Type: image/jpeg
+
+< cat.jpg
